@@ -1,5 +1,20 @@
 <?php
-
+/**
+ * Collecd_Graph file
+ *
+ * PHP 5
+ *
+ * PHPCollectd
+ * Copyright (c), Ivo Filot
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the file LICENSE
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Ivo Filot
+ * @link          https://github.com/ifilot/phpcollectd
+ * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+ */
 class Collectd_Graph {
 
 	// default settings
@@ -136,7 +151,15 @@ class Collectd_Graph {
 		// overrides
 		$this->set($options);
 
-		$ds = array('idle','nice','user','wait','system','softirq','interrupt','steal');
+		$ds_linux = array('idle','nice','user','wait','system','softirq','interrupt','steal');
+		$ds_mac = array('idle','nice','user','system');
+
+		if(PHP_OS == "Darwin") {
+			$ds = $ds_mac;
+		} else {
+			$ds = $ds_linux;
+		}
+
 		$dn = $this->options['dn'].'cpu-0/';
 		$colorfg1 = "e8e8e8";
 		$colorfg2 = "00e000";
@@ -147,32 +170,32 @@ class Collectd_Graph {
 		$colorfg7 = "a000a0";
 		$colorfg8 = "000000";
 
-		for($i=1; $i<=8; $i++) {
+		for($i=1; $i<=count($ds); $i++) {
 			${'colorbg'.$i} = $this->_lighten(${'colorfg'.$i});
 		}
 
 		$format = '%4.0lf %s';
 
 		$lns = array();
-		for($i=1; $i<=8; $i++) {
+		for($i=1; $i<=count($ds); $i++) {
 			$lns[] = 'DEF:min'.$i.'='.$dn.'cpu-'.$ds[$i-1].'.rrd:value:MIN';
 			$lns[] = 'DEF:avg'.$i.'='.$dn.'cpu-'.$ds[$i-1].'.rrd:value:AVERAGE';
 			$lns[] = 'DEF:max'.$i.'='.$dn.'cpu-'.$ds[$i-1].'.rrd:value:MAX';
 		}
 
-		$lns[] = 'CDEF:cdef8=avg8,UN,0,avg8,IF';
-		for($i=7; $i>=1;$i--) {
+		$lns[] = 'CDEF:cdef'.count($ds).'=avg'.count($ds).',UN,0,avg'.count($ds).',IF';
+		for($i=count($ds)-1; $i>=1;$i--) {
 			$lns[] = 'CDEF:cdef'.$i.'=avg'.$i.',UN,0,avg'.$i.',IF,cdef'.($i+1).',+';
 		}
 
 		//redefine $ds names to make them the same size
-		for($i=0; $i<8; $i++) {
+		for($i=0; $i<count($ds); $i++) {
 			for($j=strlen($ds[$i]); $j<10; $j++) {
 				$ds[$i].= ' ';
 			}
 		}
 
-		for($i=1; $i<=8; $i++) {
+		for($i=1; $i<=count($ds); $i++) {
 			$lns[] = 'AREA:cdef'.$i.'#'.${'colorbg'.$i};
 			$lns[] = 'LINE1:cdef'.$i.'#'.${'colorfg'.$i}.($this->options['print'] ? ':'.$ds[$i-1] : '');
 			if($this->options['print']) {

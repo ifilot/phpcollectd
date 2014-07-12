@@ -1,3 +1,24 @@
+<?php
+/**
+ * Index page
+ *
+ *  This file shows all the graphs collected by the run.php script
+ *
+ * PHP 5
+ *
+ * PHPCollectd
+ * Copyright (c), Ivo Filot
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the file LICENSE
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Ivo Filot
+ * @link          https://github.com/ifilot/phpcollectd
+ * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+ */
+?>
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -8,7 +29,6 @@
 
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/font-awesome.min.css" rel="stylesheet">
   </head>
   <body>
 <table class="table table-striped table-condensed">
@@ -23,19 +43,8 @@ if($config['debug']) {
 }
 
 $dir = 'img';
-
-// find all node folders using note_pattern
-$handle = opendir($dir);
-while($file = readdir($handle)) {
-  if(preg_match($config['node_pattern'], $file)) {
-    $nodes[] = $file;
-  }
-}
-// and finally sort the nodes
-sort($nodes);
 ?>
 
-<h2>Head node</h2>
 <table class="table-striped table-condensed"><tr><td>
   <b><?php echo gethostname(); ?></b>
 </td><td>
@@ -49,23 +58,5 @@ foreach($config['graphs'] as $graph): ?>
 </td></tr>
 </table>
 
-<h2>Compute nodes</h2>
-<table class="table-striped table-condensed">
-<?php if(isset($nodes)): ?>
-<?php foreach($nodes as $node): ?>
-<tr><td>
-  <b><?php echo strtoupper($node); ?></b>
-</td><td>
-  <?php foreach($config['graphs'] as $graph): ?>
-  <?php if(file_exists($dir.'/'.$node.'/'.$graph.'.png')): ?>
-	   <img src="<?php echo $dir.'/'.$node.'/'.$graph.'.png'; ?>" />
-  <?php endif; ?>
-  <?php endforeach; ?>
-
-</td></tr>
-<?php endforeach; ?>
-<?php endif; ?>
-
-</table>
 </body>
 </html>
