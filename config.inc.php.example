@@ -1,0 +1,41 @@
+<?php
+/**
+ * Configuration file, this file is always read
+ *
+ * PHP 5
+ *
+ * PHPCollectd
+ * Copyright (c), Ivo Filot
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the file LICENSE
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Ivo Filot
+ * @link          https://github.com/ifilot/phpcollectd
+ * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+ */
+
+$config['hostname'] = exec('hostname -f'); // use this hack to get the FQDN
+$config['lib_path'] = _get_lib_path($config['hostname']);
+$config['debug'] = true; // show debug messages
+$config['io'] = 'en1'; // provide a list of network interfaces
+$config['graphs'] = array('cpu','load','interface','temp','freq'); // set which graphs to generate
+$config['os'] = 'Linux'; // on which OS are we?
+
+if($config['debug']) {
+	error_reporting(E_ALL);
+	ini_set('display_errors', 1);
+}
+
+function _get_lib_path($hostname) {
+	if(file_exists('/var/lib/collectd/rrd/'.$hostname)) {
+		return '/var/lib/collectd/rrd/'.$hostname.'/';
+	} elseif(file_exists('/var/lib/collectd/'.$hostname)) {
+		return '/var/lib/collectd/'.$hostname.'/';
+	} elseif(file_exists('/var/lib/collectd/localhost')) {
+		return '/var/lib/collectd/localhost/';
+	} else {
+		die('Cannot establish collectd directory');
+	}
+}
