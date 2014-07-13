@@ -319,7 +319,6 @@ class Collectd_Graph {
 	private function _graph_interface($options) {
 		$this->options = array_merge($this->options, array(
 			'title' => 'Network Traffic Eth0',
-			'interface' => 'eth0',
 			'vlabel' => 'Bytes / second',
 			'endtime' => (1*3600*1),
 			)

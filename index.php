@@ -35,7 +35,12 @@
 	<tr><td>
 <?php
 
-require 'config.inc.php';   // include configuration file
+// import the configuration file
+if (!file_exists('config.inc.php'))
+  throw new Exception ('config.inc.php does not exist, please create one');
+else {
+  require_once('config.inc.php'); 
+}
 
 if($config['debug']) {
 	error_reporting(E_ALL);

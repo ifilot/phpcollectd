@@ -20,12 +20,24 @@
  * @link          https://github.com/ifilot/phpcollectd
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
-require 'config.inc.php';		// include configuration file
-require 'classes/rrdgraph.php';	// load the graph generating class
+
+// import the configuration file
+if (!file_exists('config.inc.php'))
+  throw new Exception ('config.inc.php does not exist, please create one');
+else {
+  require_once('config.inc.php'); 
+}
+// import the Collectd_graph class
+if (!file_exists('classes/rrdgraph.php'))
+  throw new Exception ('classes/rrdgraph.php does not exist, there is probably something wrong with your installation');
+else {
+  require_once('classes/rrdgraph.php'); 
+}
 
 // initialize class and set general properties
 $options = array(
 	'dn' => $config['lib_path'],
+	'interface' => $config['io'],
 	'print' => false,
 );
 // create a new Collectd_Graph instance
