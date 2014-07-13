@@ -18,16 +18,30 @@
 class Collectd_Graph {
 
 	// default settings
-	var $alpha = 0.25;
+	var $alpha = 0.25;	// defines how much colors should be 'lightened in the graph'
 
+	// provide some default settings, these can all be overwritten in config.inc.php
 	public function init() {
 		$this->options = array(
-			'width' => 150,
-			'height' => 25,
-			'print' => true,
+			'width' => 150,	// default graph width
+			'height' => 25, // default graph height
+			'print' => true, // whether to print additional information in the graph
 		);
 	}
 
+	/**
+	 *
+	 * Common set of instructions for generating graphs
+	 *
+	 * This is a general function that is called every time a graph is being
+	 * generated. Default instructions for rrd_graph are set here.
+	 *
+	 * @param    string 	$type type of graph, i.e. 'cpu', 'freq', 'temp'
+	 * @param    string 	$loc location where to write the graph image to
+	 * @param    array  	$options array of options
+	 * @return   array  	array of instructions to parse to rrd_graph() function
+	 *
+	 */
 	public function mkGraph($type, $loc, $options) {
 		$lns = array();
 
@@ -108,6 +122,17 @@ class Collectd_Graph {
 		}
 	}
 
+	/**
+	 *
+	 * Common set of instructions for generating graphs
+	 *
+	 * This is a general function that is called every time a graph is being
+	 * generated. Default instructions for rrd_graph are set here.
+	 *
+	 * @param    array  $options array of options
+	 * @return   array  array of instructions to parse to rrd_graph() function
+	 *
+	 */
 	private function _common_graph($options) {
 		$lns = array(
 			'--end','now',
@@ -141,6 +166,14 @@ class Collectd_Graph {
 		return $lns;
 	}
 
+	/**
+	 *
+	 * Generate a cpu states graph
+	 *
+	 * @param    array  $options array of options
+	 * @return   array  array of instructions to parse to rrd_graph() function
+	 *
+	 */
 	private function _graph_cpu($options) {
 		// default options
 		$this->options = array_merge($this->options, array(
@@ -151,24 +184,30 @@ class Collectd_Graph {
 		// overrides
 		$this->set($options);
 
+		// for a reason that eludes me, on Mac OS X,  not all cpu states are inventorized,
+		// therefore generate a somewhat different graph when on Mac OS X...
+		// I have set the colors in such a way that these are consistent
 		$ds_linux = array('idle','nice','user','wait','system','softirq','interrupt','steal');
 		$ds_mac = array('idle','nice','user','system');
-
 		if(PHP_OS == "Darwin") {
 			$ds = $ds_mac;
+			$colorfg1 = "e8e8e8";
+			$colorfg2 = "00e000";
+			$colorfg3 = "0000ff";
+			$colorfg4 = "ff0000";
 		} else {
 			$ds = $ds_linux;
+			$colorfg1 = "e8e8e8";
+			$colorfg2 = "00e000";
+			$colorfg3 = "0000ff";
+			$colorfg4 = "ffb000";
+			$colorfg5 = "ff0000";
+			$colorfg6 = "ff00ff";
+			$colorfg7 = "a000a0";
+			$colorfg8 = "000000";
 		}
 
 		$dn = $this->options['dn'].'cpu-0/';
-		$colorfg1 = "e8e8e8";
-		$colorfg2 = "00e000";
-		$colorfg3 = "0000ff";
-		$colorfg4 = "ffb000";
-		$colorfg5 = "ff0000";
-		$colorfg6 = "ff00ff";
-		$colorfg7 = "a000a0";
-		$colorfg8 = "000000";
 
 		for($i=1; $i<=count($ds); $i++) {
 			${'colorbg'.$i} = $this->_lighten(${'colorfg'.$i});
@@ -209,6 +248,14 @@ class Collectd_Graph {
 		return $lns;
 	}
 
+	/**
+	 *
+	 * Generate a load average graph
+	 *
+	 * @param    array  $options array of options
+	 * @return   array  array of instructions to parse to rrd_graph() function
+	 *
+	 */
 	private function _graph_load($options) {
 		$this->options = array_merge($this->options, array(
 			)
@@ -261,19 +308,14 @@ class Collectd_Graph {
 		return $lns;
 	}
 
-	private function _lighten($rgb) {
-		if(strlen($rgb) != 6) {
-			die('Invalid color code encountered');
-		}
-
-		for($i=0; $i<3; $i++) {
-			$c[$i] = hexdec(substr($rgb,$i*2,2));
-			$cc[$i] = dechex($this->alpha * $c[$i] + (1 - $this->alpha) * 255);
-		}
-
-		return $cc[0].$cc[1].$cc[2];
-	}
-
+	/**
+	 *
+	 * Generate a (network) interface graph
+	 *
+	 * @param    array  $options array of options
+	 * @return   array  array of instructions to parse to rrd_graph() function
+	 *
+	 */
 	private function _graph_interface($options) {
 		$this->options = array_merge($this->options, array(
 			'title' => 'Network Traffic Eth0',
@@ -349,6 +391,14 @@ class Collectd_Graph {
 		return $lns;
 	}
 
+	/**
+	 *
+	 * Generate a temperature graph (for the Raspberry PI)
+	 *
+	 * @param    array  $options array of options
+	 * @return   array  array of instructions to parse to rrd_graph() function
+	 *
+	 */
 	private function _graph_temperature($options) {
 		$this->options = array_merge($this->options, array(
 			'title' => 'Core temperature',
@@ -395,6 +445,15 @@ class Collectd_Graph {
 		}
 		return $lns;
 	}
+
+	/**
+	 *
+	 * Generate a frequency graph (for the Raspberry PI)
+	 *
+	 * @param    array  $options array of options
+	 * @return   array  array of instructions to parse to rrd_graph() function
+	 *
+	 */
 	private function _graph_freq($options) {
 		$this->options = array_merge($this->options, array(
 			'title' => 'Core temperature',
@@ -440,5 +499,26 @@ class Collectd_Graph {
 			$lns[] = 'GPRINT:maxc:MAX:'.$format.' Max';
 		}
 		return $lns;
+	}
+
+	/**
+	 *
+	 * Generate a 'lightened' version of a color
+	 *
+	 * @param    string  $rgb an RGB color index (without the '#')
+	 * @return   string  an RGB color index of the 'lightened' color
+	 *
+	 */
+	private function _lighten($rgb) {
+		if(strlen($rgb) != 6) {
+			die('Invalid color code encountered');
+		}
+
+		for($i=0; $i<3; $i++) {
+			$c[$i] = hexdec(substr($rgb,$i*2,2));
+			$cc[$i] = dechex($this->alpha * $c[$i] + (1 - $this->alpha) * 255);
+		}
+
+		return $cc[0].$cc[1].$cc[2];
 	}
 }
