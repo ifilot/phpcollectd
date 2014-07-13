@@ -38,7 +38,9 @@ else {
 $options = array(
 	'dn' => $config['lib_path'],
 	'interface' => $config['io'],
-	'print' => false,
+	'print' => $config['print'],
+	'width' => $config['width'],
+	'height' => $config['height'],
 );
 // create a new Collectd_Graph instance
 $graph = new Collectd_Graph;

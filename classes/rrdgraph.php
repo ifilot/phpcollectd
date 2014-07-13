@@ -23,8 +23,6 @@ class Collectd_Graph {
 	// provide some default settings, these can all be overwritten in config.inc.php
 	public function init() {
 		$this->options = array(
-			'width' => 150,	// default graph width
-			'height' => 25, // default graph height
 			'print' => true, // whether to print additional information in the graph
 		);
 	}
