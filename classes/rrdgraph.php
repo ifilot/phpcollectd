@@ -74,7 +74,7 @@ class Collectd_Graph {
 			case 'load':
 				$options = array_merge($options, array(
 					'title' => gethostname().'::Load average',
-					'vlabel' => 'load',
+					'vlabel' => 'Load average',
 					'lower-limit' => 0,
 					)
 				);
@@ -82,7 +82,7 @@ class Collectd_Graph {
 			case 'freq':
 				$options = array_merge($options, array(
 					'title' => gethostname().'::CPU frequency',
-					'vlabel' => 'load',
+					'vlabel' => 'dC',
 					'lower-limit' => 700,
 					)
 				);
@@ -138,7 +138,7 @@ class Collectd_Graph {
 			'--font','TITLE:7:',
 			'-t '.$options['title'],
 			'--units-length','5',
-			//'--vertical-label', $options['vlabel'],
+			'--vertical-label', $options['vlabel'],
 		);
 		if($options['thumbnail']) {
 			$lns = array_merge($lns, array(
@@ -175,7 +175,6 @@ class Collectd_Graph {
 	private function _graph_cpu($options) {
 		// default options
 		$this->options = array_merge($this->options, array(
-			'vlabel' => 'Jiffies',
 			'endtime' => (1*3600*1),
 			)
 		);
@@ -256,6 +255,7 @@ class Collectd_Graph {
 	 */
 	private function _graph_load($options) {
 		$this->options = array_merge($this->options, array(
+				'vlabel' => 'Load average',
 			)
 		);
 		$this->set($options);
@@ -317,7 +317,6 @@ class Collectd_Graph {
 	private function _graph_interface($options) {
 		$this->options = array_merge($this->options, array(
 			'title' => 'Network Traffic Eth0',
-			'vlabel' => 'Bytes / second',
 			'endtime' => (1*3600*1),
 			)
 		);
@@ -331,7 +330,7 @@ class Collectd_Graph {
 
 		$rx_ds = 'rx';
 		$tx_ds = 'tx';
-		$factor = 1;
+		$factor = 1.0/8.0;
 
 		$overlap_color = "efefff";
 
@@ -399,7 +398,6 @@ class Collectd_Graph {
 	private function _graph_temperature($options) {
 		$this->options = array_merge($this->options, array(
 			'title' => 'Core temperature',
-			'vlabel' => 'dC',
 			'endtime' => (1*3600*1),
 			)
 		);
@@ -454,7 +452,6 @@ class Collectd_Graph {
 	private function _graph_freq($options) {
 		$this->options = array_merge($this->options, array(
 			'title' => 'Core temperature',
-			'vlabel' => 'dC',
 			'endtime' => (1*3600*1),
 			)
 		);
